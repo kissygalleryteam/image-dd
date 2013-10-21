@@ -27,12 +27,12 @@
         <img class="J_ImgDD" src="http://img04.taobaocdn.com/imgextra/i4/10361016579292275/T1RIGTXXBkXXXXXXXX_!!413810361-0-tstar.jpg_290x10000.jpg" data-original-url="http://img01.taobaocdn.com/imgextra/i4/10361016579292275/T1RIGTXXBkXXXXXXXX_!!413810361-0-tstar.jpg" />
     </li>
     <li class="demo-item">
-        <img class="J_ImgDD" src="http://img03.taobaocdn.com/imgextra/i3/10361018904480015/T1EGqnXap7XXXXXXXX_!!413810361-0-tstar.jpg_290x10000.jpg" data-original-url="http://img02.taobaocdn.com/imgextra/i3/10361018904480015/T1EGqnXap7XXXXXXXX_!!413810361-0-tstar.jpg" />
+        <img class="" src="http://img03.taobaocdn.com/imgextra/i3/10361018904480015/T1EGqnXap7XXXXXXXX_!!413810361-0-tstar.jpg_290x10000.jpg" data-original-url="http://img02.taobaocdn.com/imgextra/i3/10361018904480015/T1EGqnXap7XXXXXXXX_!!413810361-0-tstar.jpg" />
     </li>
 </ul>
 
 <script src="../asdbase.js"></script>
-<script src="../index.js"></script>
+<!-- <script src="../index.js"></script> -->
 <script>
     var S = KISSY;
     if (S.Config.debug) {
@@ -51,7 +51,9 @@
 
     S.use('node, gallery/image-dd/1.0/index', function (S, Node, ImageDD) {
          var $ = Node.all;
-         var imageDD = new ImageDD($('#J_DemoBox')/*, '.J_ImgDD'*/);
+         var imageDD = new ImageDD($('#J_DemoBox'), '.J_ImgDD');
+         // var imageDD = new ImageDD(S.one('.J_ImgDD'));
+         // imageDD.add($(document), '.J_ImgDD');
     })
 </script>
 </body>

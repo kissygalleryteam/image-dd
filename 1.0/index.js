@@ -61,7 +61,7 @@ KISSY.add(function(S, Base, Template, Anim){
   /**
     * @param{HTMLIMGElement} 一个img标签对象的引用
     */
-  function DDObj(ele){
+  function DDObj(ele, className){
     var self = this;
     self.config = S.clone(CFG);
     
@@ -72,16 +72,16 @@ KISSY.add(function(S, Base, Template, Anim){
     S.mix(self.config, {
       ele: (ele)?(S.isArray(ele)?(ele):([ele])):([])
     });
-    self._init();
+    self._init(className);
   }
   
   var o = {
-    _init: function(){
+    _init: function(className){
       var self = this, cfg = self.config;
       
       //初始化 new 对象时的
       S.each(cfg.ele, function(item){
-        self._bindEvent(item);
+        self._bindEvent(item, className);
       });
     }
         

@@ -1,12 +1,12 @@
 {
     "name": "image-dd",
     "version": "1.0",
-    "desc": "请修改组件描述",
+    "desc": "图片拖拽，滚轮缩放",
     "cover": "",
     "author": {
-        "name": "yumen.gk",
+        "name": "yumen",
         "email": "g.gaokai@gmail.com",
-        "page": "请修改作者个人首页"
+        "page": "https://github.com/gaokai"
     },
     "type": "kissy-pie",
     "type-url": "http://abc.alibaba-inc.com/r/kissy-pie"
