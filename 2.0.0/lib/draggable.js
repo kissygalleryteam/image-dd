@@ -8,7 +8,7 @@ var UA = S.UA,
     ie = UA.ie,
     NULL = null,
     PREFIX_CLS = DDM.PREFIX_CLS,
-    doc = S.Env.host.document;
+    doc = document;
 
 /**
  * @class KISSY.DD.Draggable
@@ -658,7 +658,7 @@ var Draggable = Base.extend({
          * @ignore
          */
         move: {
-            value: false
+            value: true
         },
 
         /**

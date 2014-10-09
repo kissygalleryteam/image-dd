@@ -5,7 +5,16 @@
     <title>Dd的demo</title>
     <script src="http://g.tbcdn.cn/kissy/k/1.4.6/seed-min.js" charset="utf-8"></script>
     <style>
-        #draggable {
+        .draggable-container {
+            width: 800px;
+            height: 800px;
+            border:1px solid #333;
+            background: #fff;
+        }
+        .draggable {
+            float: left;
+            margin-top:10px;
+            margin-left: 10px;
             width:160px;
             height: 160px;
             text-align: center;
@@ -17,8 +26,13 @@
     </style>
 </head>
 <body>
-<h2>最简单的拖拽</h2>
-<div id="draggable">拖拽我</div>
+<h2>最简单的拖拽代理</h2>
+<div class="draggable-container">
+    <div class="draggable">拖拽我</div>
+    <div class="draggable">拖拽我</div>
+    <div class="draggable">拖拽我</div>
+    <div class="draggable">拖拽我</div>
+</div>
 <script>
     var S = KISSY;
     if (S.Config.debug) {
@@ -36,8 +50,10 @@
     }
 
     S.use('kg/dd/2.0.0/index', function (S, DD) {
-        new DD.Draggable({
-            "node":'#draggable'
+        new DD.DraggableDelegate({
+            container:".draggable-container",
+            selector:'.draggable',
+            "move":true
         });
     })
 </script>

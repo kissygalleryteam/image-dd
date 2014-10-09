@@ -1,5 +1,5 @@
 /*
-Thu Oct 09 2014 21:18:16 GMT+0800 (CST)
+Thu Oct 09 2014 21:34:17 GMT+0800 (CST)
 combined files by KMD:
 
 index.js
@@ -593,7 +593,7 @@ var UA = S.UA,
     ie = UA.ie,
     NULL = null,
     PREFIX_CLS = DDM.PREFIX_CLS,
-    doc = S.Env.host.document;
+    doc = document;
 
 /**
  * @class KISSY.DD.Draggable
@@ -1243,7 +1243,7 @@ var Draggable = Base.extend({
          * @ignore
          */
         move: {
-            value: false
+            value: true
         },
 
         /**
