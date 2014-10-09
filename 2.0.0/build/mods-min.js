@@ -1,0 +1,1 @@
+KISSY.config("modules",{"kg/dd/2.0.0/index":{requires:["node","base"]}});
