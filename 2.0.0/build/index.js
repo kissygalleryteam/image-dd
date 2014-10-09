@@ -1,5 +1,5 @@
 /*
-Thu Oct 09 2014 11:00:26 GMT+0800 (CST)
+Thu Oct 09 2014 11:26:55 GMT+0800 (CST)
 combined files by KMD:
 
 index.js
@@ -13,8 +13,6 @@ var Dd = Base.extend({
     initializer:function(){
         var self = this;
         var $target = self.get('$target');
-        alert(1);
-
     }
 },{
     ATTRS:{
