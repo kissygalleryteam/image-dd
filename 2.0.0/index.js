@@ -1,23 +1,21 @@
-var $ = require('node').all;
-var Base = require('base');
+/**
+ * @ignore
+ * dd support for kissy
+ * @author yiminghe@gmail.com
+ */
+var DDM = require('./lib/ddm'),
+    Draggable = require('./lib/draggable'),
+    DraggableDelegate = require('./lib/draggable-delegate'),
+    DroppableDelegate = require('./lib/droppable-delegate'),
+    Droppable = require('./lib/droppable');
+var DD = {
+    Draggable: Draggable,
+    DDM: DDM,
+    Droppable: Droppable,
+    DroppableDelegate: DroppableDelegate,
+    DraggableDelegate: DraggableDelegate
+};
 
-var Dd = Base.extend({
-    initializer:function(){
-        var self = this;
-        var $target = self.get('$target');
-    }
-},{
-    ATTRS:{
-        $target:{
-            value:'',
-            getter:function(v){
-                return $(v);
-            }
-        }
-    }
-});
+KISSY.DD = DD;
 
-module.exports = Dd;
-
-
-
+module.exports = DD;

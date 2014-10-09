@@ -1,1 +1,1 @@
-KISSY.config("modules",{"kg/dd/2.0.0/index":{requires:["node","base"]}});
+KISSY.config("modules",{"kg/dd/2.0.0/index":{requires:["./lib/ddm","./lib/draggable","./lib/draggable-delegate","./lib/droppable-delegate","./lib/droppable"]}});
