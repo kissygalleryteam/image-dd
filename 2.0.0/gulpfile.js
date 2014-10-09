@@ -56,7 +56,7 @@ gulp.task('css', function(){
 
 gulp.task('watch', function() {
     gulp.watch(src+'/dd.js', ['kmc']);
-    gulp.watch(src+'/lib/*.js', ['kmc']);
+    gulp.watch(src+'/lib/**/*.js', ['kmc']);
     gulp.watch(src+'/**/*.less', ['css']);
 });
 
