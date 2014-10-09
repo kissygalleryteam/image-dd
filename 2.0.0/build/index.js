@@ -1,5 +1,5 @@
 /*
-Thu Oct 09 2014 20:49:12 GMT+0800 (CST)
+Thu Oct 09 2014 21:18:16 GMT+0800 (CST)
 combined files by KMD:
 
 index.js
@@ -8,9 +8,12 @@ lib/draggable.js
 lib/draggable-delegate.js
 lib/droppable-delegate.js
 lib/droppable.js
+lib/plugin/constrain.js
+lib/plugin/proxy.js
+lib/plugin/scroll.js
 */
 
-KISSY.add('kg/dd/2.0.0/index',["./lib/ddm","./lib/draggable","./lib/draggable-delegate","./lib/droppable-delegate","./lib/droppable"],function(S ,require, exports, module) {
+KISSY.add('kg/dd/2.0.0/index',["./lib/ddm","./lib/draggable","./lib/draggable-delegate","./lib/droppable-delegate","./lib/droppable","./lib/plugin/constrain","./lib/plugin/proxy","./lib/plugin/scroll"],function(S ,require, exports, module) {
 /**
  * @ignore
  * dd support for kissy
@@ -20,19 +23,19 @@ var DDM = require('./lib/ddm'),
     Draggable = require('./lib/draggable'),
     DraggableDelegate = require('./lib/draggable-delegate'),
     DroppableDelegate = require('./lib/droppable-delegate'),
-    Droppable = require('./lib/droppable');
-//    Constrain = require('./lib/plugin/constrain'),
-//    Proxy = require('./lib/plugin/proxy'),
-//    Scroll = require('./lib/plugin/scroll');
+    Droppable = require('./lib/droppable'),
+    Constrain = require('./lib/plugin/constrain'),
+    Proxy = require('./lib/plugin/proxy'),
+    Scroll = require('./lib/plugin/scroll');
 var DD = {
     Draggable: Draggable,
     DDM: DDM,
     Droppable: Droppable,
     DroppableDelegate: DroppableDelegate,
-    DraggableDelegate: DraggableDelegate
-//    Constrain: Constrain,
-//    Proxy: Proxy,
-//    Scroll: Scroll
+    DraggableDelegate: DraggableDelegate,
+    Constrain: Constrain,
+    Proxy: Proxy,
+    Scroll: Scroll
 };
 
 KISSY.DD = DD;
@@ -2018,6 +2021,548 @@ module.exports = Base.extend({
          */
         disabled:{
 
+        }
+    }
+});
+});
+KISSY.add('kg/dd/2.0.0/lib/plugin/constrain',["node","base"],function(S ,require, exports, module) {
+/**
+ * @ignore
+ * plugin constrain region for drag and drop
+ * @author yiminghe@gmail.com
+ */
+var Node = require('node'),
+    Base = require('base');
+var $ = Node.all,
+    CONSTRAIN_EVENT = '.-ks-constrain' + S.now(),
+    WIN = S.Env.host;
+
+function onDragStart(e) {
+    var self = this,
+        drag = e.drag,
+        l, t, lt,
+        dragNode = drag.get('dragNode'),
+        constrain = self.get('constrain');
+    if (constrain) {
+        if (S.isWindow(constrain[0])) {
+            self.__constrainRegion = {
+                left: l = constrain.scrollLeft(),
+                top: t = constrain.scrollTop(),
+                right: l + constrain.width(),
+                bottom: t + constrain.height()
+            };
+        }
+        else if (constrain.getDOMNode) {
+            lt = constrain.offset();
+            self.__constrainRegion = {
+                left: lt.left,
+                top: lt.top,
+                right: lt.left + constrain.outerWidth(),
+                bottom: lt.top + constrain.outerHeight()
+            };
+        } else if (S.isPlainObject(constrain)) {
+            self.__constrainRegion = constrain;
+        }
+        if (self.__constrainRegion) {
+            self.__constrainRegion.right -= dragNode.outerWidth();
+            self.__constrainRegion.bottom -= dragNode.outerHeight();
+        }
+    }
+}
+
+function onDragAlign(e) {
+    var self = this,
+        info = {},
+        l = e.left,
+        t = e.top,
+        constrain = self.__constrainRegion;
+    if (constrain) {
+        info.left = Math.min(Math.max(constrain.left, l), constrain.right);
+        info.top = Math.min(Math.max(constrain.top, t), constrain.bottom);
+        e.drag.setInternal('actualPos', info);
+    }
+}
+
+function onDragEnd() {
+    this.__constrainRegion = null;
+}
+
+/**
+ * @class KISSY.DD.Plugin.Constrain
+ * @extends KISSY.Base
+ * Constrain plugin to provide ability to constrain draggable to specified region
+ */
+module.exports = Base.extend({
+
+//    pluginId: 'dd/plugin/constrain',
+
+    __constrainRegion: null,
+
+    /**
+     * start monitoring drag
+     * @param {KISSY.DD.Draggable} drag
+     * @private
+     */
+    pluginInitializer: function (drag) {
+        var self = this;
+        drag.on('dragstart' + CONSTRAIN_EVENT, onDragStart, self)
+            .on('dragend' + CONSTRAIN_EVENT, onDragEnd, self)
+            .on('dragalign' + CONSTRAIN_EVENT, onDragAlign, self);
+    },
+
+    /**
+     * stop monitoring drag
+     * @param {KISSY.DD.Draggable} drag
+     * @private
+     */
+    pluginDestructor: function (drag) {
+        drag.detach(CONSTRAIN_EVENT, {
+            context: this
+        });
+    }
+}, {
+    ATTRS: {
+        /**
+         * constrained container.
+         * @type {Boolean|HTMLElement|String}
+         * @property constrain
+         */
+
+        /**
+         * constrained container. true stands for viewport.
+         * Defaults: true.
+         * @cfg {Boolean|HTMLElement|String} constrain
+         */
+
+        /**
+         * @ignore
+         */
+        constrain: {
+            value: $(WIN),
+            setter: function (v) {
+                if (v) {
+                    if (v === true) {
+                        return $(WIN);
+                    } else if (v.nodeType || S.isWindow(v) ||
+                        typeof v === 'string') {
+                        return $(v);
+                    }
+                }
+                return v;
+            }
+        }
+    }
+});
+});
+KISSY.add('kg/dd/2.0.0/lib/plugin/proxy',["node","../ddm","base"],function(S ,require, exports, module) {
+/**
+ * @ignore
+ * generate proxy drag object,
+ * @author yiminghe@gmail.com
+ */
+var Node = require('node'),
+    DD = require('../ddm'),
+    Base = require('base');
+
+var PROXY_EVENT = '.-ks-proxy' + S.now();
+
+/**
+ * @extends KISSY.Base
+ * @class KISSY.DD.Plugin.Proxy
+ * Proxy plugin to provide abilities for draggable tp create a proxy drag node,
+ * instead of dragging the original node.
+ */
+module.exports = Base.extend({
+
+//    pluginId: 'dd/plugin/proxy',
+
+    /**
+     * make this draggable object can be proxied.
+     * @param {KISSY.DD.Draggable} drag
+     * @private
+     */
+    pluginInitializer: function (drag) {
+        var self = this, hideNodeOnDrag = self.get('hideNodeOnDrag');
+
+        function start() {
+            var node = self.get('node'),
+                dragNode = drag.get('node');
+            // cache proxy node
+            if (!self.get('proxyNode')) {
+                if (typeof node === 'function') {
+                    node = node(drag);
+                    node.addClass('ks-dd-proxy');
+                    self.set('proxyNode', node);
+                }
+            } else {
+                node = self.get('proxyNode');
+            }
+            node.show();
+            dragNode.parent().append(node);
+            DDM.cacheWH(node);
+            node.offset(dragNode.offset());
+            drag.setInternal('dragNode', dragNode);
+            drag.setInternal('node', node);
+            if (hideNodeOnDrag) {
+                dragNode.css('visibility', 'hidden');
+            }
+        }
+
+        function end() {
+            var node = self.get('proxyNode'),
+                dragNode = drag.get('dragNode');
+            if (self.get('moveOnEnd')) {
+                dragNode.offset(node.offset());
+            }
+            if (self.get('destroyOnEnd')) {
+                node.remove();
+                self.set('proxyNode', 0);
+            } else {
+                node.hide();
+            }
+            drag.setInternal('node', dragNode);
+            if (hideNodeOnDrag) {
+                dragNode.css('visibility', '');
+            }
+        }
+
+        drag.on('dragstart' + PROXY_EVENT, start)
+            .on('dragend' + PROXY_EVENT, end);
+    },
+    /**
+     * make this draggable object unproxied
+     * @param {KISSY.DD.Draggable} drag
+     * @private
+     */
+    pluginDestructor: function (drag) {
+        drag.detach(PROXY_EVENT);
+    }
+}, {
+    ATTRS: {
+        /**
+         * how to get the proxy node.
+         * default clone the node itself deeply.
+         * @cfg {Function} node
+         */
+        /**
+         * @ignore
+         */
+        node: {
+            value: function (drag) {
+                return new Node(drag.get('node').clone(true));
+            }
+        },
+
+        /**
+         * whether hide original node when drag proxy.
+         * Defaults to: false
+         * @cfg {Boolean} hideNodeOnDrag
+         */
+        /**
+         * @ignore
+         */
+        hideNodeOnDrag: {
+            value: false
+        },
+
+        /**
+         * destroy the proxy node at the end of this drag.
+         * default false
+         * @cfg {Boolean} destroyOnEnd
+         */
+        /**
+         * @ignore
+         */
+        destroyOnEnd: {
+            value: false
+        },
+
+        /**
+         * move the original node at the end of the drag.
+         * default true
+         * @cfg {Boolean} moveOnEnd
+         */
+        /**
+         * @ignore
+         */
+        moveOnEnd: {
+            value: true
+        },
+
+        /**
+         * Current proxy node.
+         * @type {KISSY.NodeList}
+         * @property proxyNode
+         */
+        /**
+         * @ignore
+         */
+        proxyNode: {
+
+        }
+    }
+});
+});
+KISSY.add('kg/dd/2.0.0/lib/plugin/scroll',["node","../ddm","base"],function(S ,require, exports, module) {
+/**
+ * @ignore
+ * auto scroll for drag object's container
+ * @author yiminghe@gmail.com
+ */
+var Node = require('node'),
+    DDM = require('../ddm'),
+    Base = require('base');
+var win = S.Env.host,
+    SCROLL_EVENT = '.-ks-dd-scroll' + S.now(),
+    RATE = [10, 10],
+    ADJUST_DELAY = 100,
+    DIFF = [20, 20],
+    isWin = S.isWindow;
+
+/**
+ * @class KISSY.DD.Plugin.Scroll
+ * @extends KISSY.Base
+ * Scroll plugin to make parent node scroll while dragging.
+ */
+module.exports = Base.extend({
+
+    pluginId: 'dd/plugin/scroll',
+
+    /**
+     * Get container node region.
+     * @private
+     */
+    getRegion: function (node) {
+        if (isWin(node[0])) {
+            return {
+                width: node.width(),
+                height: node.height()
+            };
+        } else {
+            return {
+                width: node.outerWidth(),
+                height: node.outerHeight()
+            };
+        }
+    },
+
+    /**
+     * Get container node offset.
+     * @private
+     */
+    getOffset: function (node) {
+        if (isWin(node[0])) {
+            return {
+                left: node.scrollLeft(),
+                top: node.scrollTop()
+            };
+        } else {
+            return node.offset();
+        }
+    },
+
+    /**
+     * Get container node scroll.
+     * @private
+     */
+    getScroll: function (node) {
+        return {
+            left: node.scrollLeft(),
+            top: node.scrollTop()
+        };
+    },
+
+    /**
+     * scroll container node.
+     * @private
+     */
+    setScroll: function (node, r) {
+        node.scrollLeft(r.left);
+        node.scrollTop(r.top);
+    },
+
+    /**
+     * make node not to scroll while this drag object is dragging
+     * @param {KISSY.DD.Draggable} drag
+     * @private
+     */
+    pluginDestructor: function (drag) {
+        drag.detach(SCROLL_EVENT);
+    },
+
+    /**
+     * make node to scroll while this drag object is dragging
+     * @param {KISSY.DD.Draggable} drag
+     * @private
+     */
+    pluginInitializer: function (drag) {
+        var self = this,
+            node = self.get('node');
+
+        var rate = self.get('rate'),
+            diff = self.get('diff'),
+            event,
+        // Ŀǰ���� container ��ƫ�ƣ�container Ϊ window ʱ�������� viewport
+            dxy,
+            timer = null;
+
+        // fix https://github.com/kissyteam/kissy/issues/115
+        // dragDelegate ʱ ����һ�� dragDelegate��Ӧ���� scroll
+        // check container
+        function checkContainer() {
+            if (isWin(node[0])) {
+                return 0;
+            }
+            // �ж� proxyNode������ dragNode �����ĸı�
+            var mousePos = drag.mousePos,
+                r = DDM.region(node);
+
+            if (!DDM.inRegion(r, mousePos)) {
+                clearTimeout(timer);
+                timer = 0;
+                return 1;
+            }
+            return 0;
+        }
+
+        function dragging(ev) {
+            // �������ߵ��¼������ܲ���Ҫ����
+            // fake Ҳ��ʾ���¼�������Ϊ mouseover ������
+            if (ev.fake) {
+                return;
+            }
+
+            if (checkContainer()) {
+                return;
+            }
+
+            // ���µ�ǰ�����������Ͻڵ�������λ��
+            event = ev;
+            dxy = S.clone(drag.mousePos);
+            var offset = self.getOffset(node);
+            dxy.left -= offset.left;
+            dxy.top -= offset.top;
+            if (!timer) {
+                checkAndScroll();
+            }
+        }
+
+        function dragEnd() {
+            clearTimeout(timer);
+            timer = null;
+        }
+
+        drag.on('drag' + SCROLL_EVENT, dragging);
+
+        drag.on('dragstart' + SCROLL_EVENT, function () {
+            DDM.cacheWH(node);
+        });
+
+        drag.on('dragend' + SCROLL_EVENT, dragEnd);
+
+        function checkAndScroll() {
+            if (checkContainer()) {
+                return;
+            }
+
+            var r = self.getRegion(node),
+                nw = r.width,
+                nh = r.height,
+                scroll = self.getScroll(node),
+                origin = S.clone(scroll),
+                diffY = dxy.top - nh,
+                adjust = false;
+
+            if (diffY >= -diff[1]) {
+                scroll.top += rate[1];
+                adjust = true;
+            }
+
+            var diffY2 = dxy.top;
+
+            if (diffY2 <= diff[1]) {
+                scroll.top -= rate[1];
+                adjust = true;
+            }
+
+            var diffX = dxy.left - nw;
+
+            if (diffX >= -diff[0]) {
+                scroll.left += rate[0];
+                adjust = true;
+            }
+
+            var diffX2 = dxy.left;
+
+            if (diffX2 <= diff[0]) {
+                scroll.left -= rate[0];
+                adjust = true;
+            }
+
+            if (adjust) {
+                self.setScroll(node, scroll);
+                timer = setTimeout(checkAndScroll, ADJUST_DELAY);
+                // ��ϣ����������ֵ���ر��������� window ʱ������ֵ�����������ϷŴ����� drag���ǲ����ģ�
+                // ������Ϊ���� scroll ���ı�����ֵ
+
+                // �����¼�������Ҫ scroll ���أ��ﵽԤ�ڽ�����Ԫ���������ĳ������Ϲ򶯶��Զ�����λ��.
+                event.fake = true;
+                if (isWin(node[0])) {
+                    // ��ʹ window �Զ�����ʱ��ҲҪʹ���Ϸ����������ĵ�λ���� scroll �ı�
+                    // ������ node ����ʱ��ֻ�� node �����򶯣��϶����������ĵ�λ�ò���Ҫ�ı�
+                    scroll = self.getScroll(node);
+                    event.left += scroll.left - origin.left;
+                    event.top += scroll.top - origin.top;
+                }
+                // ���������ˣ�Ԫ��ҲҪ�������� left,top
+                if (drag.get('move')) {
+                    drag.get('node').offset(event);
+                }
+                drag.fire('drag', event);
+            } else {
+                timer = null;
+            }
+        }
+    }
+}, {
+    ATTRS: {
+        /**
+         * node to be scrolled while dragging
+         * @cfg {Window|String|HTMLElement} node
+         */
+        /**
+         * @ignore
+         */
+        node: {
+            // value:window�����У�Ĭ��ֵһ���Ǽ򵥶���
+            valueFn: function () {
+                return Node.one(win);
+            },
+            setter: function (v) {
+                return Node.one(v);
+            }
+        },
+        /**
+         * adjust velocity, larger faster
+         * default [10,10]
+         * @cfg {Number[]} rate
+         */
+        /**
+         * @ignore
+         */
+        rate: {
+            value: RATE
+        },
+        /**
+         * the margin to make node scroll, easier to scroll for node if larger.
+         * default  [20,20]
+         * @cfg {number[]} diff
+         */
+        /**
+         * @ignore
+         */
+        diff: {
+            value: DIFF
         }
     }
 });

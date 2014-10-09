@@ -5,7 +5,28 @@
     <title>Dd的demo</title>
     <script src="http://g.tbcdn.cn/kissy/k/1.4.6/seed-min.js" charset="utf-8"></script>
     <style>
+        .drag-container {
+            position: absolute;
+            top:50px;
+            left: 50px;
+            width: 900px;
+            height: 300px;
+            border:1px solid #333;
+            overflow: scroll;
+        }
+        .drag-container p {
+            margin: 0;
+            position: absolute;
+            top:0;
+            left: 0;
+            width: 100%;
+            background: #ffeeee;
+            color: #666;
+            font-size: 80px;
+            z-index: 0;
+        }
         #draggable {
+            position: relative;
             width:160px;
             height: 160px;
             text-align: center;
@@ -17,8 +38,11 @@
     </style>
 </head>
 <body>
-<h2>最简单的拖拽</h2>
-<div id="draggable">拖拽我</div>
+<h2>拖拽并滚动</h2>
+<div class="drag-container">
+    <p>这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字，这里是大段的文字</p>
+    <div id="draggable">拖拽我</div>
+</div>
 <script>
     var S = KISSY;
     if (S.Config.debug) {
@@ -38,7 +62,14 @@
     S.use('kg/dd/2.0.0/index', function (S, DD) {
         new DD.Draggable({
             "node":'#draggable',
-            "move":true
+            "move":true,
+            "plugins":[
+                new DD.Scroll({
+                    "node":".drag-container",
+                    "rate":[20,20],
+                    "diff":[0,160]
+                })
+            ]
         });
     })
 </script>

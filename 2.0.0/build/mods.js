@@ -6,7 +6,10 @@ KISSY.config('modules',{
             "./lib/draggable",
             "./lib/draggable-delegate",
             "./lib/droppable-delegate",
-            "./lib/droppable"
+            "./lib/droppable",
+            "./lib/plugin/constrain",
+            "./lib/plugin/proxy",
+            "./lib/plugin/scroll"
         ]
     }
 });

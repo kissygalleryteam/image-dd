@@ -66,7 +66,7 @@ function onDragEnd() {
  */
 module.exports = Base.extend({
 
-    pluginId: 'dd/plugin/constrain',
+//    pluginId: 'dd/plugin/constrain',
 
     __constrainRegion: null,
 

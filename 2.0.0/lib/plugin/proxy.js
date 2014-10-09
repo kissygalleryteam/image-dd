@@ -4,11 +4,10 @@
  * @author yiminghe@gmail.com
  */
 var Node = require('node'),
-    DD = require('../../index'),
+    DD = require('../ddm'),
     Base = require('base');
 
-var DDM = DD.DDM,
-    PROXY_EVENT = '.-ks-proxy' + S.now();
+var PROXY_EVENT = '.-ks-proxy' + S.now();
 
 /**
  * @extends KISSY.Base
@@ -18,7 +17,7 @@ var DDM = DD.DDM,
  */
 module.exports = Base.extend({
 
-    pluginId: 'dd/plugin/proxy',
+//    pluginId: 'dd/plugin/proxy',
 
     /**
      * make this draggable object can be proxied.

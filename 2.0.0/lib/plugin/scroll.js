@@ -4,10 +4,9 @@
  * @author yiminghe@gmail.com
  */
 var Node = require('node'),
-    DD = require('../../index'),
+    DDM = require('../ddm'),
     Base = require('base');
-var DDM = DD.DDM,
-    win = S.Env.host,
+var win = S.Env.host,
     SCROLL_EVENT = '.-ks-dd-scroll' + S.now(),
     RATE = [10, 10],
     ADJUST_DELAY = 100,
