@@ -56,7 +56,7 @@ var handlePreDragStart = function (ev) {
  * drag multiple nodes under a container element
  * using only one draggable instance as a delegate.
  */
-module.exports = Draggable.extend({
+var DraggableDelegate = Draggable.extend({
 
         // override Draggable
         _onSetNode: function () {
@@ -155,3 +155,5 @@ module.exports = Draggable.extend({
             }
         }
     });
+
+module.exports = DraggableDelegate;

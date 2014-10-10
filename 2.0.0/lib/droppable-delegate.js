@@ -13,7 +13,7 @@ function dragStart() {
         allNodes = [],
         selector = self.get('selector');
     container.all(selector).each(function (n) {
-        // 2012-05-18: »º´æ¸ß¿í£¬Ìá¸ßĞÔÄÜ
+        // 2012-05-18: ç¼“å­˜é«˜å®½ï¼Œæé«˜æ€§èƒ½
         DDM.cacheWH(n);
         allNodes.push(n);
     });
@@ -25,10 +25,10 @@ function dragStart() {
  * @extend KISSY.DD.Droppable
  * Make multiple nodes droppable under a container using only one droppable instance.
  */
-module.exports = Droppable.extend({
+var DroppableDelegate = Droppable.extend({
 
     initializer: function () {
-        // Ìá¸ßĞÔÄÜ£¬ÍÏ·Å¿ªÊ¼Ê±»º´æ´úÀí½Úµã
+        // æé«˜æ€§èƒ½ï¼Œæ‹–æ”¾å¼€å§‹æ—¶ç¼“å­˜ä»£ç†èŠ‚ç‚¹
         DDM.on('dragstart', dragStart, this);
     },
 
@@ -49,13 +49,13 @@ module.exports = Droppable.extend({
         if (allNodes) {
             S.each(allNodes, function (n) {
                 var domNode = n[0];
-                // ÅÅ³ıµ±Ç°ÍÏ·ÅµÄÔªËØÒÔ¼°´úÀí½Úµã
+                // æ’é™¤å½“å‰æ‹–æ”¾çš„å…ƒç´ ä»¥åŠä»£ç†èŠ‚ç‚¹
                 if (domNode === proxyNode || domNode === dragNode) {
                     return;
                 }
                 var r = DDM.region(n);
                 if (DDM.inRegion(r, pointer)) {
-                    // ÕÒµ½Ãæ»ı×îĞ¡µÄÄÇ¸ö
+                    // æ‰¾åˆ°é¢ç§¯æœ€å°çš„é‚£ä¸ª
                     var a = DDM.area(r);
                     if (a < vArea) {
                         vArea = a;
@@ -76,8 +76,9 @@ module.exports = Droppable.extend({
     _handleOut: function () {
         var self = this;
         self.callSuper();
-        self.setInternal('node', 0);
-        self.setInternal('lastNode', 0);
+        var lastNode = self.get('lastNode') || 0;
+        self.setInternal('node', lastNode);
+        self.setInternal('lastNode', lastNode);
     },
 
     _handleOver: function (ev) {
@@ -90,11 +91,11 @@ module.exports = Droppable.extend({
 
         if (lastNode[0] !== node[0]) {
 
-            // Í¬Ò»¸ö drop ¶ÔÏóÄÚÎ¯ÍĞµÄÁ½¸ö¿É drop ½ÚµãÏàÁÚ£¬ÏÈÍ¨ÖªÉÏ´ÎµÄÀë¿ª
+            // åŒä¸€ä¸ª drop å¯¹è±¡å†…å§”æ‰˜çš„ä¸¤ä¸ªå¯ drop èŠ‚ç‚¹ç›¸é‚»ï¼Œå…ˆé€šçŸ¥ä¸Šæ¬¡çš„ç¦»å¼€
             self.setInternal('node', lastNode);
             superOut.apply(self, arguments);
 
-            // ÔÙÍ¨ÖªÕâ´ÎµÄ½øÈë
+            // å†é€šçŸ¥è¿™æ¬¡çš„è¿›å…¥
             self.setInternal('node', node);
             superEnter.call(self, ev);
         } else {
@@ -105,7 +106,9 @@ module.exports = Droppable.extend({
     _end: function (e) {
         var self = this;
         self.callSuper(e);
-        self.setInternal('node', 0);
+        var lastNode = self.get('lastNode') || 0;
+        self.setInternal('node', lastNode);
+        self.setInternal('lastNode', lastNode);
     }
 }, {
     ATTRS: {
@@ -147,3 +150,5 @@ module.exports = Droppable.extend({
         }
     }
 });
+
+module.exports = DroppableDelegate;

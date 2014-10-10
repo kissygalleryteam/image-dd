@@ -1,5 +1,5 @@
 /*
-Thu Oct 09 2014 21:34:17 GMT+0800 (CST)
+Fri Oct 10 2014 15:50:09 GMT+0800 (CST)
 combined files by KMD:
 
 index.js
@@ -1519,7 +1519,7 @@ var handlePreDragStart = function (ev) {
  * drag multiple nodes under a container element
  * using only one draggable instance as a delegate.
  */
-module.exports = Draggable.extend({
+var DraggableDelegate = Draggable.extend({
 
         // override Draggable
         _onSetNode: function () {
@@ -1618,6 +1618,8 @@ module.exports = Draggable.extend({
             }
         }
     });
+
+module.exports = DraggableDelegate;
 });
 KISSY.add('kg/dd/2.0.0/lib/droppable-delegate',["node","./ddm","./droppable"],function(S ,require, exports, module) {
 /**
@@ -1635,7 +1637,7 @@ function dragStart() {
         allNodes = [],
         selector = self.get('selector');
     container.all(selector).each(function (n) {
-        // 2012-05-18: �����߿�����������
+        // 2012-05-18: 缓存高宽，提高性能
         DDM.cacheWH(n);
         allNodes.push(n);
     });
@@ -1647,10 +1649,10 @@ function dragStart() {
  * @extend KISSY.DD.Droppable
  * Make multiple nodes droppable under a container using only one droppable instance.
  */
-module.exports = Droppable.extend({
+var DroppableDelegate = Droppable.extend({
 
     initializer: function () {
-        // �������ܣ��Ϸſ�ʼʱ���������ڵ�
+        // 提高性能，拖放开始时缓存代理节点
         DDM.on('dragstart', dragStart, this);
     },
 
@@ -1671,13 +1673,13 @@ module.exports = Droppable.extend({
         if (allNodes) {
             S.each(allNodes, function (n) {
                 var domNode = n[0];
-                // �ų���ǰ�Ϸŵ�Ԫ���Լ������ڵ�
+                // 排除当前拖放的元素以及代理节点
                 if (domNode === proxyNode || domNode === dragNode) {
                     return;
                 }
                 var r = DDM.region(n);
                 if (DDM.inRegion(r, pointer)) {
-                    // �ҵ�������С���Ǹ�
+                    // 找到面积最小的那个
                     var a = DDM.area(r);
                     if (a < vArea) {
                         vArea = a;
@@ -1698,8 +1700,9 @@ module.exports = Droppable.extend({
     _handleOut: function () {
         var self = this;
         self.callSuper();
-        self.setInternal('node', 0);
-        self.setInternal('lastNode', 0);
+        var lastNode = self.get('lastNode') || 0;
+        self.setInternal('node', lastNode);
+        self.setInternal('lastNode', lastNode);
     },
 
     _handleOver: function (ev) {
@@ -1712,11 +1715,11 @@ module.exports = Droppable.extend({
 
         if (lastNode[0] !== node[0]) {
 
-            // ͬһ�� drop ������ί�е������� drop �ڵ����ڣ���֪ͨ�ϴε��뿪
+            // 同一个 drop 对象内委托的两个可 drop 节点相邻，先通知上次的离开
             self.setInternal('node', lastNode);
             superOut.apply(self, arguments);
 
-            // ��֪ͨ���εĽ���
+            // 再通知这次的进入
             self.setInternal('node', node);
             superEnter.call(self, ev);
         } else {
@@ -1727,7 +1730,9 @@ module.exports = Droppable.extend({
     _end: function (e) {
         var self = this;
         self.callSuper(e);
-        self.setInternal('node', 0);
+        var lastNode = self.get('lastNode') || 0;
+        self.setInternal('node', lastNode);
+        self.setInternal('lastNode', lastNode);
     }
 }, {
     ATTRS: {
@@ -1769,6 +1774,9 @@ module.exports = Droppable.extend({
         }
     }
 });
+
+module.exports = DroppableDelegate;
+
 });
 KISSY.add('kg/dd/2.0.0/lib/droppable',["node","./ddm","base"],function(S ,require, exports, module) {
 /**
@@ -1799,7 +1807,7 @@ function validDrop(dropGroups, dragGroups) {
  * @extends KISSY.Base
  * Make a node droppable.
  */
-module.exports = Base.extend({
+var Droppable = Base.extend({
     initializer: function () {
         var self = this;
         self.addTarget(DDM);
@@ -2024,6 +2032,8 @@ module.exports = Base.extend({
         }
     }
 });
+
+module.exports = Droppable;
 });
 KISSY.add('kg/dd/2.0.0/lib/plugin/constrain',["node","base"],function(S ,require, exports, module) {
 /**

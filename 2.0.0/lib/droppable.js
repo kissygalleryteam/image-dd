@@ -26,7 +26,7 @@ function validDrop(dropGroups, dragGroups) {
  * @extends KISSY.Base
  * Make a node droppable.
  */
-module.exports = Base.extend({
+var Droppable = Base.extend({
     initializer: function () {
         var self = this;
         self.addTarget(DDM);
@@ -251,3 +251,5 @@ module.exports = Base.extend({
         }
     }
 });
+
+module.exports = Droppable;
