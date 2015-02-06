@@ -1,4 +1,4 @@
-//! Copyright 2015, kissy-gallery-dd@0.0.1 MIT Licensed, build time: Fri, 06 Feb 2015 03:41:09 GMT 
+//! Copyright 2015, kissy-gallery-dd@0.0.1 MIT Licensed, build time: Fri, 06 Feb 2015 05:16:36 GMT 
 define("kg/dd/0.0.1/index", ["util","base","ua","node","event-dom/gesture/basic","event-dom/gesture/pan"], function(require, exports, module) {
 var _util_ = require("util");
 var base = require("base");

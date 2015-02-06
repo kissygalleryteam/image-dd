@@ -164,6 +164,7 @@ gulp.task('build', ['lint'], function (done) {
 				.pipe(replace(/modulex.config\(([^)]+)\)/g, function(nul, match) {
 					return 'KISSY.config({' + match.replace(/"requires"\s*,/, '"modules":') + '});';	  
 				 }))
+				.pipe(replace(/"dd"/g, '"kg/dd/0.0.1/index"'))
 				.pipe(rename(function(path) {
 					console.log(path);
 					path.basename = path.basename.replace('-debug', '').replace(/dd$/, 'index').replace(/dd-deps$/, 'index-deps');	
