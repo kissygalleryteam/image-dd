@@ -1,4 +1,8 @@
 {
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> a9e16490e9acf6ade24352f791de9fdc19e51a3e
     "name": "dd",
     "version": "2.0.0",
     "main": "index.js",
@@ -9,5 +13,36 @@
         "!lib/**/*"
     ],
     "dependencies": {
+<<<<<<< HEAD
+=======
+    "name": "modulex-dd",
+    "author": "yiminghe <yiminghe@gmail.com>",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "http://github.com/kissyteam/dd.git"
+    },
+    "ignore": [
+        "**/*",
+        "!build/**/*",
+        "!lib/**/*",
+        "!docs/**/*",
+        "!meta/**/*",
+        "!index.js"
+    ],
+    "dependencies": {
+        "modulex": "*",
+        "modulex-feature": "modulex-feature#1.x",
+        "modulex-ua": "modulex-ua#1.x",
+        "modulex-base": "modulex-base#1.x",
+        "modulex-util": "modulex-util#1.x",
+        "modulex-node": "modulex-node#1.x",
+        "modulex-event-dom": "modulex-event-dom#1.x"
+    },
+    "devDependencies": {
+        "modulex-io": "1.x"
+>>>>>>> master
+=======
+>>>>>>> a9e16490e9acf6ade24352f791de9fdc19e51a3e
     }
 }

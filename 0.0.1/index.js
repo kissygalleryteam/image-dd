@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> a9e16490e9acf6ade24352f791de9fdc19e51a3e
 var $ = require('node').all;
 var Base = require('base');
 
@@ -21,3 +25,10 @@ module.exports = Dd;
 
 
 
+<<<<<<< HEAD
+=======
+module.exports = require('./lib/dd');
+module.exports.version = require('./package.json').version;
+>>>>>>> master
+=======
+>>>>>>> a9e16490e9acf6ade24352f791de9fdc19e51a3e
