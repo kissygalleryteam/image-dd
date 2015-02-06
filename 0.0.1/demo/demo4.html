@@ -1,0 +1,212 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Demo - 基于拖放委托 + 容器自动滚动的拖放排序</title>
+	<script src="//g.assets.daily.taobao.net/kissy/k/6.0.0/seed-min.js" data-config="{combine:true}"></script>
+    <link href="//g.alicdn.com/kissy/k/1.4.7/css/dpl/base.css" rel="stylesheet"/>
+    <style>
+	
+.box{margin-bottom:10px;}
+.box .box-hd{position:relative;height:27px;padding:0 10px;border:1px solid #bad6ff;border-bottom:none;background:#e5efff url(assets/bg-repeatx.png) repeat-x 0 -10px;}
+.box .box-hd i{float:left;width:16px;height:16px;margin:5px 4px 0 0;}
+.box .box-hd h3{float:left;line-height:26px;}
+.box .box-act{float:right;margin-top:5px;}
+.box .box-act a{float:right;margin-left:6px;line-height:16px;}
+.box .box-bd{padding:10px;border:1px solid #bad6ff;background:#D9EBF5;height:40px;}
+
+.box .box-tp,
+.box .box-bt{display:block;position:relative;height:4px;overflow:hidden;margin:0 0 -4px 0;z-index:10;}
+.box .box-bt{margin:-4px 0 0 0;}
+.box .box-tp b,
+.box .box-bt b{display:block;float:right;width:4px;height:4px;overflow:hidden;}
+.box .box-tp,
+.box .box-tp b,
+.box .box-bt,
+.box .box-bt b{background:url(assets/bg-repeatx.png) no-repeat -3px 0;}
+.box .box-tp b{background-position:0 0;}
+.box .box-bt{background-position:-3px -3px;}
+.box .box-bt b{background-position:0 -3px;}
+
+body{
+    padding:10px;
+}
+      .container {
+        border: 1px solid #366EBE;
+        height: 200px;
+        padding: 10px;
+        position: relative;
+        overflow: auto;
+    }
+
+    .component {
+        margin: 10px 10px;
+        width: 100px;
+        height: 100px;
+        display: inline-block;
+        *display: inline;
+        *zoom: 1;
+        overflow: hidden;
+    }
+
+    .cheader {
+        cursor: move;
+        border: 1px solid black;
+        height: 20px;
+        line-height: 20px;
+    }
+
+    .component .cheader {
+        cursor: move;
+    }
+
+    .ks-dd-dragging {
+        border: 2px #4886DE dashed;
+    }
+        .ks-dd-dragging * {
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+
+
+<button id="add"> add module</button>
+<br/><br/>
+
+<script type="x-template" id="newTpl">
+    <div class="box component">
+        <s class="box-tp"><b></b></s>
+
+        <div class="box-hd cheader">
+            <h3>拖动头</h3>
+        </div>
+        <div class="box-bd">drag proxy {id}
+        </div>
+        <s class="box-bt"><b></b></s>
+    </div>
+</script>
+
+<div id="container2" class="container">
+
+
+    <div class="box component">
+        <s class="box-tp"><b></b></s>
+
+        <div class="box-hd cheader">
+            <h3>拖动头</h3>
+        </div>
+        <div class="box-bd">
+            drag proxy 1
+        </div>
+        <s class="box-bt"><b></b></s>
+    </div>
+    <div class="box component">
+        <s class="box-tp"><b></b></s>
+
+        <div class="box-hd cheader">
+            <h3>拖动头</h3>
+        </div>
+        <div class="box-bd">
+            drag proxy 2
+        </div>
+        <s class="box-bt"><b></b></s>
+    </div>
+    <div class="box component">
+        <s class="box-tp"><b></b></s>
+
+        <div class="box-hd cheader">
+            <h3>拖动头</h3>
+        </div>
+        <div class="box-bd">
+            drag proxy 3
+        </div>
+        <s class="box-bt"><b></b></s>
+    </div>
+</div>
+
+<script>
+    KISSY.use("node,kg/dd/0.0.1/,kg/dd/0.0.1/plugin/scroll,kg/dd/0.0.1/plugin/proxy", function (S, Node, DD, Scroll, Proxy) {
+
+        var DDM = DD.DDM,
+                DraggableDelegate = DD.DraggableDelegate,
+                DroppableDelegate = DD.DroppableDelegate,
+                Draggable = DD.Draggable,
+                Droppable = DD.Droppable;
+
+        /**
+         * 拖放排序
+         */
+        S.ready(function () {
+
+            var dragDelegate = new DraggableDelegate({
+                container: "#container2",
+                handlers: ['.cheader'],
+                selector: '.component',
+                move: true,
+                plugins: [
+                    new Proxy({
+                        /**
+                         * 如何产生替代节点
+                         * @param drag 当前拖对象
+                         */
+                        node: function (drag) {
+                            var n = S.one(drag.get("dragNode")[0].cloneNode());
+                            n.removeAttr('id');
+                            n.css("opacity", 0.8);
+                            return n;
+                        },
+                        // 主体位置不跟随 proxy
+                        moveOnEnd: false,
+                        // 每次 proxy 都重新生成
+                        destroyOnEnd: true
+                    }),
+                    new Scroll({
+                        node: "#container2"
+                    })
+                ]
+            });
+
+            var dropDelegate = new DroppableDelegate({
+                container: "#container2",
+                selector: '.component'
+            });
+
+            dragDelegate.on("dragover", function (ev) {
+                var drag = ev.drag;
+                var drop = ev.drop;
+                var dragNode = drag.get("dragNode"),
+                        dropNode = drop.get("node");
+                var middleDropX = (dropNode.offset().left * 2 + dropNode.width()) / 2;
+                if (ev.pageX > middleDropX) {
+                    var next = dropNode.next();
+                    if (next && next[0] == dragNode[0]) {
+
+                    } else {
+                        dragNode.insertAfter(dropNode);
+                    }
+                } else {
+                    var prev = dropNode.prev();
+                    if (prev && prev[0] == dragNode[0]) {
+                    } else {
+                        dragNode.insertBefore(dropNode);
+                    }
+                }
+            });
+
+            var container = S.one("#container2");
+            var id = 4;
+            container.unselectable();
+
+            var newTpl= S.one('#newTpl').html();
+            S.one("#add").on("click", function () {
+                new Node(S.substitute(newTpl,{
+                    id:(id++)
+                })).appendTo(container).unselectable();
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

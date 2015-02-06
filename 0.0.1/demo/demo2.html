@@ -1,0 +1,202 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Demo - Droppable 使用示例</title>
+<script src="//g.assets.daily.taobao.net/kissy/k/6.0.0/seed-min.js" data-config="{combine:true}"></script>
+<link rel="stylesheet" href="//g.alicdn.com/kissy/k/1.4.7/css/dpl/base.css" />
+<style>
+
+.box{margin-bottom:10px;}
+.box .box-hd{position:relative;height:27px;padding:0 10px;border:1px solid #bad6ff;border-bottom:none;background:#e5efff url(assets/bg-repeatx.png) repeat-x 0 -10px;}
+.box .box-hd i{float:left;width:16px;height:16px;margin:5px 4px 0 0;}
+.box .box-hd h3{float:left;line-height:26px;}
+.box .box-act{float:right;margin-top:5px;}
+.box .box-act a{float:right;margin-left:6px;line-height:16px;}
+.box .box-bd{padding:10px;border:1px solid #bad6ff;background:#D9EBF5;height:40px;}
+
+.box .box-tp,
+.box .box-bt{display:block;position:relative;height:4px;overflow:hidden;margin:0 0 -4px 0;z-index:10;}
+.box .box-bt{margin:-4px 0 0 0;}
+.box .box-tp b,
+.box .box-bt b{display:block;float:right;width:4px;height:4px;overflow:hidden;}
+.box .box-tp,
+.box .box-tp b,
+.box .box-bt,
+.box .box-bt b{background:url(bg-repeatx.png) no-repeat -3px 0;}
+.box .box-tp b{background-position:0 0;}
+.box .box-bt{background-position:-3px -3px;}
+.box .box-bt b{background-position:0 -3px;}
+body{
+    padding:10px;
+}
+    .container {
+        height: 270px;
+        padding: 10px;
+        position: relative;
+    }
+    
+    .component {
+        margin: 10px 10px;
+        width: 90px;
+        height: 90px;
+        display: inline-block;
+        *display: inline;
+        *zoom: 1;
+        overflow: hidden;
+        line-height:20px;
+    }
+    
+    .cheader {
+        cursor: move;
+        border: 1px solid black;
+        height: 20px;
+        line-height: 20px;
+    }
+
+    #drop, #drop3 {
+        height: 100px;
+        line-height: 30px;
+      
+    }
+    
+    .box .ks-dd{
+        background:white;
+        opacity:1;
+        *filter:alpha(opacity=100);
+    }
+    .box .ks-dd-drag-over {
+        background: #a52a2a;
+    }
+
+    .box .ks-dd-drop-over {
+        background: #fa8072;
+        opacity:0.6;
+        *filter:alpha(opacity=60);
+    }
+
+    #container3 .component .cheader {
+        cursor: move;
+    }
+    
+</style>
+</head>
+<body>
+
+<div id="container" class="container">
+    <div class="box component" id="c1">
+        <s class="box-tp"><b></b></s>
+        <div class="box-hd">
+            <h3>Drag</h3>
+        </div>
+        <div class="box-bd">
+            intersect drag
+        </div>
+        <s class="box-bt"><b></b></s>
+    </div>
+    
+    <div class="box component" id="c2">
+        <s class="box-tp"><b></b></s>
+        <div class="box-hd">
+            <h3>Drag</h3>
+        </div>
+        <div class="box-bd">
+            strict drag
+        </div>
+        <s class="box-bt"><b></b></s>
+    </div>
+    
+    <div class="box component" id="c3">
+        <s class="box-tp"><b></b></s>
+        <div class="box-hd">
+            <h3>Drag</h3>
+        </div>
+        <div class="box-bd">
+            point drag
+        </div>
+        <s class="box-bt"><b></b></s>
+    </div>
+   
+    
+    <div class="box" >
+        <s class="box-tp"><b></b></s>
+        <div id="drop" class="box-bd ks-dd">
+            drop zone
+        </div>
+        <s class="box-bt"><b></b></s>
+    </div>
+    
+</div>
+
+<script>
+KISSY.use("node,kg/dd/0.0.1/", function (S, Node, DD) {
+    var DDM = DD.DDM,
+
+    Draggable = DD.Draggable,
+        Droppable = DD.Droppable,
+
+            DropMode=Draggable.DropMode;
+
+
+    var p;
+    /**
+     * 集中监听所有
+     */
+    DDM.on("dragstart", function(ev) {
+
+        var c = ev.drag;
+        p = c.get("dragNode").css("position");
+    });
+    DDM.on("dragend", function(ev) {
+        var c = ev.drag;
+        c.get("dragNode").css("position", p);
+    });
+
+    /**
+     * 简单拖放
+     */
+
+
+    var c1 = new Draggable({
+        node:"#c1",
+        //模式,
+        // intersect :区域相交就算enter
+        // strict : drag 区域完全在 drop 区域内才算
+        // point : 鼠标在 drop 区域内
+        //默认 point
+        mode:DropMode.INTERSECT,
+        move:true
+    });
+
+
+    var c3 = new Draggable({
+        node:"#c3",
+        mode:DropMode.STRICT,
+        move:true
+    });
+
+
+    var c2 = new Draggable({
+        node:"#c2",
+        move:true
+    });
+
+
+    var drop = new Droppable({
+        node:"#drop"
+    });
+
+
+    function onhit(ev) {
+        ev.drag.get("node").css("margin", "5px 10px");
+        ev.drag.get("node").appendTo(ev.drop.get("node"));
+        ev.drag.destroy();
+    }
+
+    drop.on("drophit",onhit);
+
+});
+</script>
+
+</body>
+</html>
